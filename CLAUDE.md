@@ -3,7 +3,8 @@
 Document intelligence platform for retail recovery audit. Read
 `docs/design.md` before changing anything structural; it pins the decisions
 and the reasons behind them. `docs/first-steps.md` says what is being built
-now and what is deliberately deferred.
+now and what is deliberately deferred; `docs/roadmap.md` covers the phases
+after that.
 
 ## Working in this repo
 

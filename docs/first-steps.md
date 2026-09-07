@@ -91,3 +91,5 @@ Only after steps 1 to 3:
 - The spreadsheet dependency graph. The census only counts cross-sheet
   formulas so the effort can be sized.
 - Anything MCP.
+
+What comes after these steps is laid out phase by phase in `docs/roadmap.md`.
