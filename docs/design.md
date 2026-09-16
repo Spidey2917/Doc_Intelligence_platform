@@ -3,6 +3,34 @@
 Reference for every decision made so far and why. Update this when a
 decision changes; do not let the code drift away from it silently.
 
+## 0. The invariant
+
+Layouts change per vendor, per retailer, per document kind and over time.
+What a document is trying to say does not. Everything below serves that:
+
+- **Meaning is the key.** Every fact lands under a canonical field defined
+  by what it means, never by where it was found or which label it sat
+  beside. Two documents that say the same thing produce the same fact.
+- **Form is a cache.** Fingerprints, cached extraction plans and header
+  aliases only accelerate a semantic extraction that already happened.
+  They never decide what a value means, and their output passes the same
+  verification as a fresh extraction. A cache that disagrees with meaning
+  is discarded, never trusted.
+- **Identity is intent.** A document's category is what it asserts: terms
+  between parties, a claim, a statement of account, an order, a request
+  for payment. Not its filename, sender or shape. An email can assert more
+  than one thing.
+- **Quality is fixed first, cost is minimised under it.** Per-field
+  accuracy targets come from the auditors. The cascade picks the cheapest
+  tier that meets them, and shadow sampling keeps the cheap tiers honest.
+- **Patterns only verify, never locate.** Regular expressions and keyword
+  matches appear in verification and normalisation (does this look like a
+  date, an identifier, an amount), never to find a value or decide its
+  meaning.
+- **Downstream consumes meaning.** Facts are queried by canonical field,
+  entity, role and period. Nothing downstream knows how any document was
+  laid out.
+
 ## 1. Problem
 
 Retail recovery auditing checks that the money that moved between a retailer
@@ -184,6 +212,16 @@ column; 20 to 70% is a nullable typed column; under 20% stays in EAV.
 Identifiers that cross categories (vendor id, PO number, invoice number,
 agreement reference, claim number) are the join keys and get exact
 normalization rules before anything else.
+
+**Categories as intents.** During discovery the category list is
+re-expressed as what each kind of document asserts, so classification
+targets meaning. Emails are allowed several intents at once.
+
+**Qualifiers and references.** A term is often conditional ("applies above
+a volume threshold", "net of returns") or points elsewhere ("as per last
+year's terms"). The vocabulary carries qualifier fields so conditions are
+captured with the value, and reference fields that the linking phase
+resolves, instead of dropping either.
 
 **Gold set.** 30 to 50 hand-labelled documents per category against the v1
 schema, 20% held out untouched, before the first production prompt is

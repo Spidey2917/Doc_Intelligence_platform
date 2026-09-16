@@ -98,6 +98,24 @@ parse tier's headings and a small retrieval step pick the sections likely
 to hold each field group, so a sixty-page agreement costs a few pages of
 tokens. Provenance still points at the real page.
 
+## Keeping cheap tiers honest: shadow sampling
+
+Cost is minimised under a fixed quality target, never instead of one. The
+cascade's acceptance criterion is the same semantic verification at every
+tier, and on top of that a fraction of tier-1 and tier-2 outputs also run
+through tier 3 in the background. The disagreement rate is the cheap
+tier's true error rate for that vendor or fingerprint. The sampling rate
+starts high for a new plan or alias and decays as agreement holds; it
+rises again when a disagreement appears. A cheap tier whose error rate
+exceeds the field's target is demoted for that vendor until it is
+relearned. The rule the whole cascade obeys: caches accelerate, they
+never decide.
+
+Facts also carry the role of the document that asserted them (agreement,
+statement, claim, invoice, email). Downstream reconciliation is a
+comparison of what different documents say about the same entity and
+period, which is what an audit is.
+
 ## The learning loop
 
 Inputs:
