@@ -31,6 +31,24 @@ Forms, Vendor Payment Agreements, Internal Claims, Statements, Invoices,
 Purchase Orders, Accounts Payable, Accounts Receivable. The list is open.
 Samples exist for the first four, which are the high-variance ones.
 
+## 2a. Core requirements
+
+Stated by the project owner and treated as the acceptance criteria for the
+whole platform:
+
+1. Extract data by looking into the contents of a document.
+2. Be independent of where content sits inside the file. Layouts drift,
+   columns move, headers get renamed.
+3. Be cost efficient. The major criterion at a million files a month.
+4. Be self-learning over time.
+5. Learn from a sample corpus only, then extend to every incoming document
+   of each category.
+6. Accept any intake format: image, PDF, spreadsheet, email, embedded
+   email, inline attachment.
+
+How each is met, and the learning loop that ties them together, is in
+`docs/learning-and-cost.md`.
+
 ## 3. Constraints
 
 - No templates, ever. Layouts, sources and document types are open sets.

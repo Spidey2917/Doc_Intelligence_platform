@@ -34,9 +34,18 @@ precision and recall on the four sampled categories.
    extracted string is located back in the source text; a value that cannot
    be found verbatim is marked unverified and never lands as trusted. That
    check is the anti-hallucination guard an auditor can defend to a vendor.
-4. **Normalization** (`docintel/normalize.py`). The vocabulary's rules as
-   code: canonical identifier forms, ISO dates, decimal money with currency,
-   percentages as fractions. Raw and normalized values are both kept.
+   Type, shape and cross-field checks from the vocabulary sit beside it.
+   Long documents get section selection so only the relevant pages reach
+   the model. Verified extractions feed an exemplar store that later
+   extractions retrieve from.
+4. **Normalization and header resolution** (`docintel/normalize.py`,
+   `docintel/headers.py`). The vocabulary's rules as code: canonical
+   identifier forms, ISO dates, decimal money with currency, percentages as
+   fractions. Raw and normalized values are both kept. The header resolver
+   maps observed column headers to canonical fields through an alias table,
+   embedding similarity, and a one-off model proposal verified by value
+   shape, so renamed or reordered columns cost nothing after the first
+   sighting.
 5. **Landing** (`docintel/landing/`). The DDL from `docs/design.md` plus an
    `extraction_run` table for extractor and model versions. Bulk insert,
    append-only, supersede instead of update. Projections for the four
@@ -44,7 +53,8 @@ precision and recall on the four sampled categories.
 6. **Eval harness** (`docintel/eval/`). Per-field precision, recall and F1
    against the gold set, exact and normalized, per category. Results are
    committed per run so every prompt, schema or model change has a number.
-   No extraction change merges without one.
+   Cost per document, blended and per tier, is reported beside accuracy.
+   No extraction change merges without both.
 
 Decisions gated on the open questions: which endpoint serves the model
 (local GPU, CPU only, or hosted), which OCR backend, and which SQL Server
@@ -80,8 +90,11 @@ measured on the real mix.
    and table headers; cache which fields were found where; give a repeat
    fingerprint the fast path. A changed vendor layout changes the hash and
    falls back automatically.
-5. **Routing** (`docintel/route.py`). The three tiers as one decision
-   function, made per page for mixed PDFs.
+5. **Routing as a cascade** (`docintel/route.py`). The cheapest tier that
+   passes verification wins; escalation only on failure, decided per page
+   for mixed PDFs. Cached plans carry verification statistics and are
+   invalidated when failures rise or a correction lands on a
+   plan-extracted document. Escalation rate per tier is a tracked metric.
 
 Done when: the LLM share of the real corpus is measured rather than
 estimated, spreadsheet facts carry cell provenance, and cost per document
@@ -102,9 +115,13 @@ back into the gold set.
 3. **Workers and queues** (`docintel/workers/`). CPU workers for
    decomposition and parsing, a separate pool for model calls, retries with
    a dead-letter queue, and backpressure so a burst does not fall over.
-4. **Observability.** Per-stage timing and error rates, model and prompt
-   versions on every fact, a nightly eval on a rolling sample, and drift
-   alerts when a vendor's field frequencies change.
+4. **Observability and drift detection.** Per-stage timing and error
+   rates, model and prompt versions on every fact, a nightly eval on a
+   rolling sample, and drift alerts from fingerprint novelty, header
+   novelty, escalation and verification failure rates per vendor and
+   category. A monthly discovery-mode run proposes vocabulary additions.
+   Review sampling is active learning: novel layouts, low confidence,
+   extractor disagreement, plus a small random slice.
 5. **Throughput test** on the real hardware allocation, with the capacity
    plan rewritten from measured numbers.
 
@@ -135,6 +152,10 @@ with provenance.
    allowances in an agreement never claimed, terms that differ between an
    agreement and a statement. These are the building blocks of the
    conclusion step that was deferred.
+6. **First fine-tuning cycle.** Once verified labels reach the thousands,
+   fine-tune the small extraction model on them, gate it on the held-out
+   set, canary by vendor, then roll out. Repeat on a schedule. This is
+   where self-learning turns into lower cost per document.
 
 ## Gates that reorder the phases
 
@@ -163,6 +184,9 @@ with provenance.
 Each phase adds stages to the same library and commands to the same CLI
 (`docintel parse`, `extract`, `eval`, `load`). Nothing gets rewritten; the
 batch pipeline and the MCP server stay thin callers.
+
+The learning loop that runs through all of these phases is specified in
+`docs/learning-and-cost.md`.
 
 ## Rules that hold throughout
 

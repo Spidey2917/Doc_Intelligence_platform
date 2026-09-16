@@ -64,7 +64,9 @@ the census:
 Expected findings, in rough order of likelihood: password-protected PDFs and
 zips, .xls and .xlsb workbooks (no formula visibility yet), PST files,
 signed or encrypted email, odd encodings in CSV exports, emails saved as
-.msg that are really .eml. Each gets a decision: handle it in decomposition,
+.msg that are really .eml, inline images that are really pasted documents
+(check the sizes of inline parts in the census), and protected files whose
+password sits in the email body. Each gets a decision: handle it in decomposition,
 route it to a manual queue, or accept the gap with a number attached.
 
 ## Step 4: schema discovery (Phase 1)
